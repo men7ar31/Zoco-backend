@@ -137,6 +137,12 @@ curl -s "<BASE>/api/sessionlogs" -H "Authorization: Bearer <TOKEN>"
 3. Reiniciar la app tras cambios.
 4. Probar en …azurewebsites.net/swagger (si habilitado) o con Postman.
 
+🧭 Endpoints principales
+
+Base URL (producción):  
+https://zocoapp-dvg9crgygwhhbrep.brazilsouth-01.azurewebsites.net/
+
+
 🐛 Troubleshooting
 - CORS / preflight (OPTIONS) 401/404: verificar orden de middleware
 - 500.30 al iniciar: revisar logs de App Service y cadena de conexión
