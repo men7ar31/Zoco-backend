@@ -10,48 +10,42 @@ using ZocoApp.Seed;
 using ZocoApp.Services;
 using ZocoApp.Services.Interfaces;
 
-
 var builder = WebApplication.CreateBuilder(args);
 
+// Services
 builder.Services.AddScoped<IUsersService, UsersService>();
 
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
+
+// Swagger + JWT auth
 builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "ZocoApp", Version = "v1" });
-
     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
         Type = SecuritySchemeType.Http,
-        Scheme = "bearer",              
+        Scheme = "bearer",
         BearerFormat = "JWT",
-        Description = "Pega solo el token. Swagger enviará 'Authorization: Bearer {token}'."
+        Description = "Pegá solo el token. Swagger enviará 'Authorization: Bearer {token}'."
     });
-
     c.AddSecurityRequirement(new OpenApiSecurityRequirement
     {
-        {
-            new OpenApiSecurityScheme
-            {
-                Reference = new OpenApiReference
-                {
-                    Type = ReferenceType.SecurityScheme,
-                    Id = "Bearer"
-                }
-            },
-            Array.Empty<string>()
-        }
+        { new OpenApiSecurityScheme { Reference = new OpenApiReference
+            { Type = ReferenceType.SecurityScheme, Id = "Bearer" } }, Array.Empty<string>() }
     });
 });
 
-
-var jwtSettings = builder.Configuration.GetSection("JwtSettings");
-var secretKey = jwtSettings.GetValue<string>("SecretKey");
+// JWT
+var jwtSection = builder.Configuration.GetSection("JwtSettings");
+var secretKey = jwtSection.GetValue<string>("SecretKey");
+if (string.IsNullOrWhiteSpace(secretKey))
+{
+    throw new InvalidOperationException("JwtSettings:SecretKey no configurado. Cargalo por User Secrets o variables de entorno.");
+}
 
 builder.Services.AddAuthentication(options =>
 {
@@ -66,49 +60,47 @@ builder.Services.AddAuthentication(options =>
         ValidateAudience = true,
         ValidateLifetime = true,
         ValidateIssuerSigningKey = true,
-        ValidIssuer = jwtSettings["Issuer"],
-        ValidAudience = jwtSettings["Audience"],
+        ValidIssuer = jwtSection["Issuer"],
+        ValidAudience = jwtSection["Audience"],
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey))
     };
 });
 
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("Frontend", policy =>
-    {
-        policy
-            .WithOrigins(
-                "http://localhost:5173",
-                "http://127.0.0.1:5173"
-            )
-            .AllowAnyHeader()
-            .AllowAnyMethod();
-        
-    });
-});
-
-builder.Services.AddScoped<JwtHelper>();
-var allowedOrigin = builder.Configuration["FrontendOrigin"];
+// CORS (un solo policy)
+var allowedOrigins = builder.Configuration.GetSection("FrontendOrigins").Get<string[]>() ??
+    new[] { "http://localhost:5173" /*, "https://TU-APP.vercel.app"*/ };
 
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AppCors", policy =>
-        policy.WithOrigins(allowedOrigin ?? "http://localhost:5173")
+    options.AddPolicy("AllowFrontend", policy =>
+        policy.WithOrigins(allowedOrigins)
               .AllowAnyHeader()
               .AllowAnyMethod());
 });
 
+// Helpers
+builder.Services.AddScoped<JwtHelper>();
+
 var app = builder.Build();
 
+// DB seed (dejá solo UNO: si usás DbSeeder, remové DbInitializer, o viceversa)
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
     await DbSeeder.SeedAsync(db);
+    // ZocoApp.Data.DbInitializer.Seed(app); // <- comentar si no lo usás
 }
 
-app.UseAuthentication();
-app.UseAuthorization();
+// Pipeline
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
 
+app.UseHttpsRedirection();
+
+// Manejo de errores
 app.UseExceptionHandler(errorApp =>
 {
     errorApp.Run(async context =>
@@ -120,17 +112,12 @@ app.UseExceptionHandler(errorApp =>
         await problem.ExecuteAsync(context);
     });
 });
-
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
-
-app.UseCors("Frontend");
 app.UseMiddleware<ErrorHandlingMiddleware>();
+
+// Orden recomendado: CORS -> Auth -> Authorization
+app.UseCors("AllowFrontend");
+app.UseAuthentication();
 app.UseAuthorization();
-ZocoApp.Data.DbInitializer.Seed(app);
 
 app.MapControllers();
 

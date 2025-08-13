@@ -7,11 +7,19 @@ namespace ZocoApp.Models
     {
         public int Id { get; set; }
 
-        public DateTime StartTime { get; set; } = DateTime.UtcNow;
-        public DateTime? EndTime { get; set; }
-
-        [ForeignKey("User")]
+        [Required]
         public int UserId { get; set; }
-        public User? User { get; set; }
+
+        [Required]
+        public DateTime FechaInicio { get; set; }
+
+        public DateTime? FechaFin { get; set; }
+
+        // Opcional: datos de contexto
+        public string? IpAddress { get; set; }
+        public string? UserAgent { get; set; }
+
+        [ForeignKey("UserId")]
+        public User User { get; set; } = null!;
     }
 }

@@ -23,12 +23,14 @@ Thumbs.db
 # NuGet
 *.nupkg
 *.snupkg
-# El directorio de paquetes puede ser recuperado con restore
 packages/
 
 # Configuration
 appsettings.Development.json
 appsettings.Local.json
+
+# User Secrets
+secrets.json
 
 # Database files
 *.db
@@ -41,9 +43,11 @@ TestResult*/
 *.coveragexml
 
 # DotCover
-.idea/
 *.dotCover
 
-# Rider
+# Rider / JetBrains
 .idea/
 *.sln.iml
+
+# Publicaciones locales de .NET
+publish/
