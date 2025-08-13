@@ -80,6 +80,12 @@ Obligatorias:
 - JwtSettings__Audience → ZocoUsers
 - FrontendOrigins__0 → (ver sección CORS)
 
+## Capturas de pantalla
+En la carpeta `capturas de pantalla` de este repositorio se incluyen imágenes de ejemplo de:
+- Funcionalidades del sistema desde el frontend (vistas de Admin y User).
+- Pruebas de endpoints en Swagger (backend).
+
+
 Opcionales:
 - Swagger__Enabled = true (para habilitar Swagger en prod temporalmente)
 
