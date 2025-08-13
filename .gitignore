@@ -1,53 +1,43 @@
-# Build results
+# --- Compilados / build ---
 bin/
 obj/
 out/
+*.exe
+*.dll
+*.pdb
+*.cache
+*.log
 
-# User-specific files
+# --- IDEs ---
+.vs/
 *.user
 *.rsuser
 *.suo
-*.userosscache
 *.sln.docstates
-
-# Logs
-*.log
-
-# OS generated files
-.DS_Store
-Thumbs.db
-
-# VS Code
 .vscode/
+.idea/
 
-# NuGet
+
+packages/
 *.nupkg
 *.snupkg
-packages/
 
-# Configuration
-appsettings.Development.json
-appsettings.Local.json
 
-# User Secrets
-secrets.json
-
-# Database files
-*.db
-*.sqlite
-
-# Test results
 TestResult*/
 *.trx
 *.coverage
 *.coveragexml
 
-# DotCover
-*.dotCover
+.DS_Store
+Thumbs.db
 
-# Rider / JetBrains
-.idea/
-*.sln.iml
 
-# Publicaciones locales de .NET
-publish/
+appsettings.json
+appsettings.Development.json
+appsettings.Local.json
+*.http               # p.ej. ZocoApp.http (peticiones locales)
+*.rest               # archivos REST client
+
+*.tmp
+*.swp
+*.orig
