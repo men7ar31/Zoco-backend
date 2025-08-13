@@ -1,6 +1,0 @@
-@ZocoApp_HostAddress = http://localhost:5216
-
-GET {{ZocoApp_HostAddress}}/weatherforecast/
-Accept: application/json
-
-###
