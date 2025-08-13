@@ -67,8 +67,9 @@ builder.Services.AddAuthentication(options =>
 });
 
 // CORS (un solo policy)
-var allowedOrigins = builder.Configuration.GetSection("FrontendOrigins").Get<string[]>() ??
-    new[] { "http://localhost:5173" /*, "https://TU-APP.vercel.app"*/ };
+var allowedOrigins = builder.Configuration.GetSection("FrontendOrigins").Get<string[]>()
+    ?? new[] { "http://localhost:5173" };
+
 
 builder.Services.AddCors(options =>
 {
